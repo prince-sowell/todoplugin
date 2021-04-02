@@ -1,0 +1,16 @@
+{
+  "name": "todoplugin",
+  "version": "1.0.0",
+  "description": "RxDB domain todo",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "rxdb": "^9.15.0",
+    "rxjs": "^6.6.7",
+    "subscriptions-transport-ws": "^0.9.18"
+  }
+}
