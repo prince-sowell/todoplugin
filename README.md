@@ -6,7 +6,7 @@
 yarn
 ```
 
-## functionements
+## fonctionements
 
 - plugin RxDB:
   - installation des plugins necessaire pour le functionement d'RxDB si celle ci n'est pas encore installer
