@@ -1,9 +1,9 @@
-import { TODOBASE } from "./initDataBase";
+import { initDatabase } from "./initDataBase";
 
 export default {
   install(Vue) {
     const todoBase = {
-      DB: TODOBASE,
+      DB: initDatabase,
     };
 
     Vue.prototype.$todoBase = todoBase;

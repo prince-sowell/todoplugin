@@ -21,15 +21,21 @@ addRxPlugin(RxDBUpdatePlugin);
 // "async" is optional;
 // more info on params: https://quasar.dev/quasar-cli/boot-files
 // something to do
-console.log("DatabaseService: creating database..");
-export const TODOBASE = await createRxDatabase({
-  name: "todo",
-  adapter: "idb",
-});
+export const initDatabase = async (token) => {
+  if (token) {
+    console.log("DatabaseService: creating database..");
+    const TODOBASE = await createRxDatabase({
+      name: "todo",
+      adapter: "idb",
+    });
 
-console.log("DatabaseService: created database");
-await TODOBASE.addCollections({
-  todos: {
-    schema: todoSchema,
-  },
-});
+    console.log("DatabaseService: created database");
+    await TODOBASE.addCollections({
+      todos: {
+        schema: todoSchema,
+      },
+    });
+  } else {
+    console.log("error");
+  }
+};
