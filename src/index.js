@@ -1,35 +1,11 @@
-// import something here
-import todoSchema from "./schema/TodoSchema";
-import { createRxDatabase, addRxPlugin } from "rxdb";
+import { TODOBASE } from "./initDataBase";
 
-//plugins use By RxDb
-import { RxDBValidatePlugin } from "rxdb/plugins/validate";
-import * as PouchdbAdapterIdb from "pouchdb-adapter-idb";
-import { RxDBReplicationPlugin } from "rxdb/plugins/replication";
-import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder";
-import { RxDBUpdatePlugin } from "rxdb/plugins/update";
-import { RxDBReplicationGraphQLPlugin } from "rxdb/plugins/replication-graphql";
+export default {
+  install(Vue) {
+    const todoBase = {
+      DB: TODOBASE,
+    };
 
-addRxPlugin(RxDBReplicationGraphQLPlugin);
-
-addRxPlugin(RxDBQueryBuilderPlugin);
-addRxPlugin(RxDBValidatePlugin);
-addRxPlugin(RxDBReplicationPlugin);
-addRxPlugin(PouchdbAdapterIdb);
-addRxPlugin(RxDBUpdatePlugin);
-
-// "async" is optional;
-// more info on params: https://quasar.dev/quasar-cli/boot-files
-// something to do
-console.log("DatabaseService: creating database..");
-export const DB = await createRxDatabase({
-  name: "todo",
-  adapter: "idb",
-});
-
-console.log("DatabaseService: created database");
-await DB.addCollections({
-  todos: {
-    schema: todoSchema,
+    Vue.prototype.$todoBase = todoBase;
   },
-});
+};

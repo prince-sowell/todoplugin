@@ -1,5 +1,5 @@
 import { SubscriptionClient } from "subscriptions-transport-ws";
-import { DB } from "./index";
+import { TODOBASE } from "./initDataBase";
 // more info on params: https://quasar.dev/quasar-cli/boot-files
 // something to do
 if (isAuth) {
@@ -57,7 +57,7 @@ if (isAuth) {
 
   // Start Replication every 10 seconds
 
-  const replicationState = DB.todos.syncGraphQL({
+  const replicationState = TODOBASE.todos.syncGraphQL({
     url: process.env.SYNCURL,
     headers: {
       "x-hasura-admin-secret": process.env.SECRET,
