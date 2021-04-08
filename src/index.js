@@ -1,11 +1,13 @@
 import { initDatabase } from "./initDataBase";
+import { initReplication } from "./replication";
 
 export default {
-  install(Vue) {
-    const todoBase = {
+  install(app) {
+    const todoPlugin = {
+      replication: initReplication,
       DB: initDatabase,
     };
 
-    Vue.prototype.$todoBase = todoBase;
+    app.config.globalProperties.$todoPlugin = todoPlugin;
   },
 };

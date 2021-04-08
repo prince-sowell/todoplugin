@@ -1,5 +1,5 @@
 {
-  "name": "todoplugin",
+  "name": "poctodoplugin",
   "version": "1.0.0",
   "description": "RxDB domain todo",
   "main": "src/index.js",
