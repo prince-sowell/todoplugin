@@ -1,8 +1,13 @@
 import { SubscriptionClient } from "subscriptions-transport-ws";
-import { initDatabase } from "./initDataBase";
+import * as database from "./index";
 // more info on params: https://quasar.dev/quasar-cli/boot-files
 // something to do
-export const initReplication = () => {
+export const initReplication = async (
+  isAuth,
+  SECRET,
+  URLWEBSOCKET,
+  SYNCURL
+) => {
   if (isAuth) {
     const batchSize = 5;
     const pullQueryBuilder = (doc) => {
@@ -57,11 +62,12 @@ export const initReplication = () => {
     };
 
     // Start Replication every 10 seconds
+    const db = await database.createDb();
 
-    const replicationState = initDatabase.TODOBASE.todos.syncGraphQL({
-      url: process.env.SYNCURL,
+    const replicationState = db.todos.syncGraphQL({
+      url: SYNCURL,
       headers: {
-        "x-hasura-admin-secret": process.env.SECRET,
+        "x-hasura-admin-secret": SECRET,
       },
       push: {
         batchSize,
@@ -79,19 +85,14 @@ export const initReplication = () => {
       console.log("replication error:");
       console.dir(err);
     });
-    // Error log
-    replicationUser.error$.subscribe((err) => {
-      console.log("replication error:");
-      console.dir(err);
-    });
 
     // setup the subscription client
     // Ici Pour reduire le temps de latence du serveur
-    const wsClient = new SubscriptionClient(process.env.URLWEBSOCKET, {
+    const wsClient = new SubscriptionClient(URLWEBSOCKET, {
       reconnect: true,
       connectionParams: {
         headers: {
-          "x-hasura-admin-secret": process.env.SECRET,
+          "x-hasura-admin-secret": SECRET,
         },
       },
       connectionCallback: () => {
