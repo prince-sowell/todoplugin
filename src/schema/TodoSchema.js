@@ -8,6 +8,9 @@ const schema = {
         type: "string",
         primary: true,
       },
+      user_id: {
+        type: "string",
+      },
       text: {
         type: "string",
       },
@@ -23,7 +26,7 @@ const schema = {
         format: "date-time",
       },
     },
-    required: ["text", "isCompleted", "id"],
+    required: ["text", "isCompleted", "id", "user_id"],
     indexes: ["created_at"],
   };
   
