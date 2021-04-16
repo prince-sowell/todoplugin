@@ -45,6 +45,13 @@ export const initReplication = async (SECRET, URLWEBSOCKET, SYNCURL) => {
                         id
                       }
                     }
+                    update_users(_set: {updated_at:"${new Date(
+                      0
+                    ).toUTCString()}"}, where: {id: {_eq: "${doc.user_id}"}}) {
+                      returning {
+                        id
+                      }
+                    }
                   }
                 `;
     const variables = {
