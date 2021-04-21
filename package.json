@@ -1,8 +1,11 @@
 {
-  "name": "poctodoplugin",
-  "version": "1.0.4",
+  "name": "@julienprince007/todoplugin",
+  "version": "1.0.0",
   "description": "RxDB domain todo",
   "main": "src/index.js",
+  "repository": {
+    "url": "git://github.com/julienprince007/todoplugin.git"
+  },
   "scripts": {
     "test": "test"
   },
