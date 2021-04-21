@@ -1,7 +1,7 @@
 // import something here
 import todoSchema from "./schema/TodoSchema";
+import userSchema from "./schema/userSchema";
 import { createRxDatabase, addRxPlugin } from "rxdb";
-import { initReplication } from "./replication";
 
 //plugins use By RxDb
 import { RxDBValidatePlugin } from "rxdb/plugins/validate";
@@ -33,12 +33,9 @@ export const createDb = async () => {
     todos: {
       schema: todoSchema,
     },
+    users: {
+      schema: userSchema,
+    },
   });
   return TODOBASE;
-};
-
-export default {
-  install(app) {
-    app.provide("REPLICATION", initReplication);
-  },
 };
