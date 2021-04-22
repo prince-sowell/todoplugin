@@ -49,6 +49,10 @@ export const initTodoReplication = async (SECRET, URLWEBSOCKET, SYNCURL) => {
               subscription{
                 todo {
                   id
+                  text
+                  isCompleted
+                  updated_at
+                  user_id
                 }
               }`;
 

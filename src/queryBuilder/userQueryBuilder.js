@@ -12,8 +12,8 @@ export const userPullQueryBuilder = (doc) => {
                       {updated_at: {_gt: "${doc.updated_at}"}}
                     
                   }, 
-                  limit: 5, 
-                  order_by: {updated_at: asc}) {
+                  limit: 5
+                 ) {
                     id
                     name
                     deleted

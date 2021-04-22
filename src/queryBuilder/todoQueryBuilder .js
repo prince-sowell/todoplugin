@@ -13,8 +13,7 @@ export const todoPullQueryBuilder = (doc) => {
                         {updated_at: {_gt: "${doc.updated_at}"}}
                     ]
                 },
-                limit: 5,
-                order_by: [{updated_at: asc}, {id: asc}]
+                limit: 5
                 ) {
                   id
                   text
