@@ -1,14 +1,17 @@
 import { SubscriptionClient } from "subscriptions-transport-ws";
-import * as database from "../index";
 import {
   todoPullQueryBuilder,
   todoPushQueryBuilder,
 } from "../queryBuilder/todoQueryBuilder ";
 
-export const initTodoReplication = async (SECRET, URLWEBSOCKET, SYNCURL) => {
+export const initTodoReplication = async (
+  SECRET,
+  URLWEBSOCKET,
+  SYNCURL,
+  db
+) => {
   const batchSize = 5;
   // Start Replication every 10 min
-  const db = await database.createDb();
   const todoReplicationState = db.todos.syncGraphQL({
     url: SYNCURL,
     headers: {
@@ -23,7 +26,7 @@ export const initTodoReplication = async (SECRET, URLWEBSOCKET, SYNCURL) => {
       queryBuilder: todoPullQueryBuilder,
     },
     live: true,
-    liveInterval: 1000 * 60 * 10,
+    liveInterval: 1000 * 60 * 60,
     deletedFlag: "deleted",
   });
   // Error log
@@ -67,4 +70,5 @@ export const initTodoReplication = async (SECRET, URLWEBSOCKET, SYNCURL) => {
       console.dir(error);
     },
   });
+  return todoReplicationState;
 };

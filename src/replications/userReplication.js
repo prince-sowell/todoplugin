@@ -1,15 +1,18 @@
 import { SubscriptionClient } from "subscriptions-transport-ws";
-import * as database from "../index";
 
 import {
   userPullQueryBuilder,
   userPushQueryBuilder,
 } from "../queryBuilder/userQueryBuilder";
 
-export const initUserReplication = async (SECRET, URLWEBSOCKET, SYNCURL) => {
+export const initUserReplication = async (
+  SECRET,
+  URLWEBSOCKET,
+  SYNCURL,
+  db
+) => {
   const batchSize = 5;
   // Start Replication every 10 min
-  const db = await database.createDb();
 
   const userReplicationState = db.users.syncGraphQL({
     url: SYNCURL,
@@ -26,7 +29,7 @@ export const initUserReplication = async (SECRET, URLWEBSOCKET, SYNCURL) => {
     },
     live: true,
     deletedFlag: "deleted",
-    liveInterval: 1000 * 60 * 10,
+    liveInterval: 1000 * 60 * 60,
   });
   // Error log
   userReplicationState.error$.subscribe((err) => {

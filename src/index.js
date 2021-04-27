@@ -21,10 +21,10 @@ addRxPlugin(RxDBUpdatePlugin);
 
 // more info on params: https://quasar.dev/quasar-cli/boot-files
 // something to do
-export const createDb = async () => {
+export const createDb = async (name) => {
   console.log("DatabaseService: creating database..");
   const TODOBASE = await createRxDatabase({
-    name: "todo",
+    name: `todo_${name}`,
     adapter: "idb",
     ignoreDuplicate: true,
   });
