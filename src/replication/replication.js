@@ -60,8 +60,6 @@ export const initTodoReplication = async (
   pullQueryBuilder
 ) => {
   const batchSize = 5;
-  console.log("collection", collections);
-
   // Start Replication every 10 min
   const replicationState = await localDB.todos.syncGraphQL({
     url: SYNCURL,
