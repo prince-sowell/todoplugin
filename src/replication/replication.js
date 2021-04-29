@@ -20,12 +20,13 @@ addRxPlugin(RxDBUpdatePlugin);
 // something to do
 
 let localDB = null;
+let collections = [];
 
 export const createDb = async (name, schema) => {
   if (name !== "" && schema !== undefined) {
     console.log("DatabaseService: creating database..");
     const TODOBASE = await createRxDatabase({
-      name: `todo_${name}`,
+      name: `db_${name}`,
       adapter: "idb",
       ignoreDuplicate: true,
     });
@@ -36,10 +37,9 @@ export const createDb = async (name, schema) => {
       obj[key] = {
         schema: value,
       };
-      await TODOBASE.addCollections(obj);
+      collections.push(await TODOBASE.addCollections(obj));
     });
     localDB = TODOBASE;
-    return TODOBASE;
   }
 };
 
@@ -51,17 +51,37 @@ export const getDB = () => {
   }
 };
 
+export const getCollection = (name) => {
+  if (name !== "") {
+    let collection = null;
+    let index = collections.findIndex((coll, index) => {
+      for (let [key, value] of Object.entries(coll)) {
+        if (key === name) {
+          return value;
+        }
+      }
+    });
+    Object.entries(collections[index]).map(
+      ([key, value]) => (collection = value)
+    );
+    return collection;
+  } else {
+    console.log("don't reload");
+  }
+};
+
 export const initTodoReplication = async (
   SECRET,
   URLWEBSOCKET,
   SYNCURL,
   query,
   pushQueryBuilder,
-  pullQueryBuilder
+  pullQueryBuilder,
+  nameColletion
 ) => {
   const batchSize = 5;
-  // Start Replication every 10 min
-  const replicationState = await localDB.todos.syncGraphQL({
+  let collection = getCollection(nameColletion);
+  const replicationState = await collection.syncGraphQL({
     url: SYNCURL,
     headers: {
       "x-hasura-admin-secret": SECRET,
