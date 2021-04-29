@@ -54,16 +54,13 @@ export const getDB = () => {
 export const getCollection = (name) => {
   if (name !== "") {
     let collection = null;
-    let index = collections.findIndex((coll, index) => {
+    collections.findIndex((coll, index) => {
       for (let [key, value] of Object.entries(coll)) {
         if (key === name) {
-          return value;
+          collection = value;
         }
       }
     });
-    Object.entries(collections[index]).map(
-      ([key, value]) => (collection = value)
-    );
     return collection;
   } else {
     console.log("don't reload");
