@@ -2,6 +2,7 @@ import {
   getDB,
   createDb,
   initTodoReplication,
+  getCollection,
 } from "./replication/replication";
 
 export default {
@@ -10,6 +11,7 @@ export default {
       getDB: getDB,
       createDb: createDb,
       initTodoReplication: initTodoReplication,
+      getCollection: getCollection,
     };
     app.provide("DB", rxdb);
   },
