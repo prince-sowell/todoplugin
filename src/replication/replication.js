@@ -7,7 +7,6 @@ import { RxDBReplicationPlugin } from "rxdb/plugins/replication";
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder";
 import { RxDBUpdatePlugin } from "rxdb/plugins/update";
 import { RxDBReplicationGraphQLPlugin } from "rxdb/plugins/replication-graphql";
-import { LocalStorage } from "quasar";
 
 //plugins use By RxDb
 addRxPlugin(RxDBReplicationGraphQLPlugin);
@@ -19,49 +18,34 @@ addRxPlugin(RxDBUpdatePlugin);
 
 let localDB = null;
 let collections = [];
-let replicationState = null;
+let replicationStates = [];
 let wsClient = null;
-
+let collectionsName = [];
 let SECRET = "";
 let URLWEBSOCKET = "";
 let SYNCURL = "";
-let query = null;
 let schema = null;
-let pullQueryBuilder = null;
-let pushQueryBuilder = null;
-
 let queryBuilders = null;
 
 export const initRxdb = (
   secret,
   urlwebsocket,
   syncURL,
-  subscriptionQuery,
-  pullQuery,
+  querys,
   collectionSchema
 ) => {
   SECRET = secret;
   URLWEBSOCKET = urlwebsocket;
   SYNCURL = syncURL;
-  query = subscriptionQuery;
-  queryBuilders = pullQuery;
+  queryBuilders = querys;
   schema = collectionSchema;
 };
 
-export const restartReplication = async () => {
-  const dbName = LocalStorage.getItem("dbName");
-  const collectionName = LocalStorage.getItem("collectionName");
-  await createDb(dbName);
-  setTimeout(() => {
-    collectionName.map(async (name) => {
-      await initReplication(name);
-    });
-    //map
-  }, 1000);
-};
 export const stopReplication = () => {
-  if (replicationState !== null && wsClient !== null) {
-    replicationState.cancel();
+  if (replicationStates !== null && wsClient !== null) {
+    replicationStates.map((replication) => {
+      replication.cancel();
+    });
     wsClient.close();
   } else {
     throw "No replication state";
@@ -77,12 +61,13 @@ export const createDb = async (name) => {
       ignoreDuplicate: true,
     });
     console.log("DatabaseService: created database");
-    // ajout de chaque collection
+    // ajout de collection et son nom
     Object.entries(schema).map(async ([key, value]) => {
       const obj = {};
       obj[key] = {
         schema: value,
       };
+      collectionsName.push(key);
       collections.push(await TODOBASE.addCollections(obj));
     });
     localDB = TODOBASE;
@@ -118,9 +103,59 @@ export const getCollection = (name) => {
   }
 };
 
-const setupQueryBuilder = (collectionName) => {
-  let array = queryBuilders[collectionName];
-  array.findIndex((coll, index) => {
+export const initReplication = async () => {
+  const batchSize = 5;
+  wsClient = new SubscriptionClient(URLWEBSOCKET, {
+    reconnect: true,
+    connectionParams: {
+      headers: {
+        "x-hasura-admin-secret": SECRET,
+      },
+    },
+    connectionCallback: () => {
+      console.log("SubscriptionClient.connectionCallback:");
+    },
+  });
+  collectionsName.map(async (name) => {
+    const collection = getCollection(name);
+    const { subQuery, pullQueryBuilder, pushQueryBuilder } = setupQuery(name);
+
+    if (collection) {
+      const replicationState = await collection.syncGraphQL({
+        url: SYNCURL,
+        headers: {
+          "x-hasura-admin-secret": SECRET,
+        },
+        push: {
+          batchSize,
+          queryBuilder: pushQueryBuilder,
+        },
+        pull: {
+          batchSize,
+          queryBuilder: pullQueryBuilder,
+        },
+        live: true,
+        liveInterval: 1000 * 60 * 60,
+        deletedFlag: "deleted",
+      });
+      replicationStates.push(replicationState);
+      subscribe(replicationState, subQuery);
+    } else {
+      throw "error replication verify your name of collection";
+    }
+  });
+};
+
+/**
+ * private function
+ *
+ */
+
+const setupQuery = (collectionName) => {
+  let pullQueryBuilder = null;
+  let pushQueryBuilder = null;
+  let subQuery = null;
+  queryBuilders[collectionName].findIndex((coll, index) => {
     for (let [key, value] of Object.entries(coll)) {
       if (key === "pull") {
         pullQueryBuilder = value;
@@ -128,63 +163,27 @@ const setupQueryBuilder = (collectionName) => {
       if (key == "push") {
         pushQueryBuilder = value;
       }
+      if (key == "sub") {
+        subQuery = value;
+      }
     }
   });
+  return { pullQueryBuilder, pushQueryBuilder, subQuery };
 };
 
-export const initReplication = async (collectionName) => {
-  const batchSize = 5;
-
-  const collection = getCollection(collectionName);
-  setupQueryBuilder(collectionName);
-
-  if (collection) {
-    replicationState = await collection.syncGraphQL({
-      url: SYNCURL,
-      headers: {
-        "x-hasura-admin-secret": SECRET,
-      },
-      push: {
-        batchSize,
-        queryBuilder: pushQueryBuilder,
-      },
-      pull: {
-        batchSize,
-        queryBuilder: pullQueryBuilder,
-      },
-      live: true,
-      liveInterval: 1000 * 60 * 60,
-      deletedFlag: "deleted",
-    });
-    // Error log
-    replicationState.error$.subscribe((err) => {
-      throw err;
-    });
-    // setup the subscription client
-    // Ici Pour reduire le temps de latence du serveur
-    wsClient = new SubscriptionClient(URLWEBSOCKET, {
-      reconnect: true,
-      connectionParams: {
-        headers: {
-          "x-hasura-admin-secret": SECRET,
-        },
-      },
-      connectionCallback: () => {
-        console.log("SubscriptionClient.connectionCallback:");
-      },
-    });
-
-    const changeObservable = wsClient.request({ query });
-    changeObservable.subscribe({
-      next(data) {
-        console.log("subscription emitted todo => trigger run");
-        replicationState.run();
-      },
-      error(error) {
-        throw error;
-      },
-    });
-  } else {
-    throw "error replication verify your name of collection";
-  }
+const subscribe = (replicationState, query) => {
+  let changeObservable = wsClient.request({ query });
+  changeObservable.subscribe({
+    next(data) {
+      console.log("subscription emitted => trigger run");
+      replicationState.run();
+    },
+    error(error) {
+      throw error;
+    },
+  });
+  // Error log
+  replicationState.error$.subscribe((err) => {
+    throw err;
+  });
 };

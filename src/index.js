@@ -4,7 +4,6 @@ import {
   initReplication,
   getCollection,
   initRxdb,
-  restartReplication,
   stopReplication,
 } from "./replication/replication";
 
@@ -19,7 +18,6 @@ export default {
     app.provide("DB", rxdb);
     app.provide("stopReplication", stopReplication);
     app.config.globalProperties.$initRxdb = initRxdb;
-    app.config.globalProperties.$restartReplication = restartReplication;
     app.config.globalProperties.$createDb = createDb;
   },
 };

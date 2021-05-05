@@ -1,6 +1,6 @@
-# plugin Todo
+# Plugin Replication Graphql d'RxDB
 
-## Plugin d'integration de la replication GraphQl d'RxDB avec quasar V2, et Hasura. 
+## Plugin d'integration de la replication GraphQl d'RxDB avec quasar V2, et Hasura.
 
 ### Install the dependencies
 
@@ -15,13 +15,21 @@ yarn
 
 ## les methods du plugin d'RxDB
 
-### 1. createDb ()
+### 1. initRxdb ()
+
+- Prend 5 parametres:
+  - SECRET: token de la connexion de Hasura.
+  - URLWEBSOCKET: End-point du canal subscription GraphQl d'Hasura.
+  - SYNCURL: End-point GraphQl d'Hasura.
+  - querys: Un tableau qui regroup les query et queryBuilder pour le functionement de la replication d'RxDB, Le format du tableau est:
+    ` querys["nomDeLaCollection"] = [ { pull: PullQueryBuilder de la collection }, { push: PushQueryBuilder de la collection }, { sub: subscriptionQuery de la collection },`
+  - Schema: schema d'rxdb au forma suivant:
+    - `const schma = {nomDeLaCollection: {schema RxDB clasic de la collection}}`
+
+### 2. createDb ()
 
 - Création de la base de donnée local
-  - prend deux parametres:
-    - nom de la base qui suit les règles d'RxDB: **https://rxdb.info/rx-database.html#name**
-    - Schema pour la creation de la collection, format json comme dans l'exemple ci-dessous:
-      `const schema = { nonColection: { schemaColection } }`
+  - prend le nom de la base de donnée comme parametre
 
 ### 2. getDB ()
 
@@ -29,17 +37,9 @@ yarn
 
 ### 3. getCollection ()
 
-- Prend un parametres, le nom de la collection
+- Prend le nom de la collection comme parametres
 - retourne la collection s'il exist, null le cas contraire
 
-### 4. initTodoReplication ()
+### 4. initReplication ()
 
-- Prend 7 parametres:
-  - SECRET: token de la connexion de Hasura.
-  - URLWEBSOCKET: End-point du canal subscription GraphQl d'Hasura.
-  - SYNCURL: End-point GraphQl d'Hasura.
-  - query: Query pour la methode subscription d'RxDB format: `const query = 'subscription { todo { id } }'`,
-    **PS: il faut utiliser un backtick a la place de l'apostrophe https://fr.wiktionary.org/wiki/backtick#en**
-  - pushQueryBuilder: Method de pushQueryBuilder d'RxDB. **https://rxdb.info/replication-graphql.html**
-  - pullQueryBuilder: Method de pullQueryBuilder d'RxDB, voir le lien ci-dessous
-  - nameColletion: Nom de la collection pour la replication
+- initialise la replication de tous les collections existant crée
