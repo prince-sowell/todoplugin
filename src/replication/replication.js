@@ -47,7 +47,7 @@ export const initRxdb = (
 };
 
 export const stopReplication = () => {
-  if (replicationStates !== null && wsClient !== null) {
+  if (replicationStates.length && wsClient !== null) {
     replicationStates.map((replication) => {
       replication.cancel();
     });
