@@ -1,5 +1,6 @@
 import { createRxDatabase, addRxPlugin } from "rxdb";
 import { SubscriptionClient } from "subscriptions-transport-ws";
+import { LocalStorage } from "quasar";
 
 import { RxDBValidatePlugin } from "rxdb/plugins/validate";
 import * as PouchdbAdapterIdb from "pouchdb-adapter-idb";
@@ -27,6 +28,10 @@ let SYNCURL = "";
 let schema = null;
 let queryBuilders = null;
 
+/**
+ * public function
+ */
+
 export const initRxdb = (
   secret,
   urlwebsocket,
@@ -47,6 +52,10 @@ export const stopReplication = () => {
       replication.cancel();
     });
     wsClient.close();
+    collectionsName = [];
+    replicationStates = [];
+    wsClient = null;
+    localDB = null;
   } else {
     throw "No replication state";
   }
@@ -70,6 +79,8 @@ export const createDb = async (name) => {
       collectionsName.push(key);
       collections.push(await TODOBASE.addCollections(obj));
     });
+    LocalStorage.set("dbName", name);
+    LocalStorage.set("collectionsName", collectionsName);
     localDB = TODOBASE;
     return TODOBASE;
   } else {
@@ -148,7 +159,6 @@ export const initReplication = async () => {
 
 /**
  * private function
- *
  */
 
 const setupQuery = (collectionName) => {
