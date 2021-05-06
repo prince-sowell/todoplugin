@@ -80,7 +80,6 @@ export const createDb = async (name) => {
       collections.push(await TODOBASE.addCollections(obj));
     });
     LocalStorage.set("dbName", name);
-    LocalStorage.set("collectionsName", collectionsName);
     localDB = TODOBASE;
     return TODOBASE;
   } else {

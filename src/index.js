@@ -19,5 +19,6 @@ export default {
     app.provide("stopReplication", stopReplication);
     app.config.globalProperties.$initRxdb = initRxdb;
     app.config.globalProperties.$createDb = createDb;
+    app.config.globalProperties.$initReplication = initReplication;
   },
 };
