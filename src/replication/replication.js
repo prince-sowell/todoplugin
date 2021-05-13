@@ -18,8 +18,8 @@ addRxPlugin(PouchdbAdapterIdb);
 addRxPlugin(RxDBUpdatePlugin);
 
 let localDB = null;
-let userId = "";
 let userRole = "";
+let idOrg = "";
 let collections = [];
 let replicationStates = [];
 let wsClient = null;
@@ -59,7 +59,7 @@ export const stopReplication = () => {
     wsClient = null;
     localDB = null;
     userRole = "";
-    userId = "";
+    idOrg = "";
   } else {
     throw "No replication state";
   }
@@ -67,8 +67,8 @@ export const stopReplication = () => {
 
 export const createDb = async (name, userInfos) => {
   if (name !== undefined) {
-    userId = userInfos.id;
     userRole = userInfos.role;
+    idOrg = userInfos.org;
     console.log("DatabaseService: creating database..");
     const TODOBASE = await createRxDatabase({
       name: `sw_${name}`,
@@ -126,8 +126,8 @@ export const initReplication = async () => {
     connectionParams: {
       headers: {
         "x-hasura-admin-secret": SECRET,
-        "X-Hasura-User-Id": userId,
         "X-hasura-Role": userRole,
+        "X-Hasura-Org-Id": idOrg,
       },
     },
     connectionCallback: () => {
@@ -143,8 +143,8 @@ export const initReplication = async () => {
         url: SYNCURL,
         headers: {
           "x-hasura-admin-secret": SECRET,
-          "X-Hasura-User-Id": userId,
           "X-hasura-Role": userRole,
+          "X-Hasura-Org-Id": idOrg,
         },
         push: {
           batchSize,
