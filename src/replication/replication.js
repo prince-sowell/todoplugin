@@ -1,6 +1,5 @@
 import { createRxDatabase, addRxPlugin } from "rxdb";
 import { SubscriptionClient } from "subscriptions-transport-ws";
-import { LocalStorage } from "quasar";
 
 import { RxDBValidatePlugin } from "rxdb/plugins/validate";
 import * as PouchdbAdapterIdb from "pouchdb-adapter-idb";
@@ -55,7 +54,7 @@ export const stopReplication = () => {
 };
 
 export const createDb = async (name, userToken) => {
-  if (name !== undefined) {
+  if (name !== undefined && userToken !== undefined) {
     token = userToken;
     console.log("DatabaseService: creating database..");
     const TODOBASE = await createRxDatabase({
@@ -73,7 +72,6 @@ export const createDb = async (name, userToken) => {
       collectionsName.push(key);
       collections.push(await TODOBASE.addCollections(obj));
     });
-    LocalStorage.set("dbName", name);
     localDB = TODOBASE;
     return TODOBASE;
   } else {
@@ -108,46 +106,48 @@ export const getCollection = (name) => {
 };
 
 export const initReplication = async () => {
-  const batchSize = 5;
-  wsClient = new SubscriptionClient(URLWEBSOCKET, {
-    reconnect: true,
-    connectionParams: {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-    connectionCallback: () => {
-      console.log("SubscriptionClient.connectionCallback:");
-    },
-  });
-  collectionsName.map(async (name) => {
-    const collection = getCollection(name);
-    const { subQuery, pullQueryBuilder, pushQueryBuilder } = setupQuery(name);
-
-    if (collection) {
-      const replicationState = await collection.syncGraphQL({
-        url: SYNCURL,
+  if (!replicationStates.length) {
+    const batchSize = 5;
+    wsClient = new SubscriptionClient(URLWEBSOCKET, {
+      reconnect: true,
+      connectionParams: {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        push: {
-          batchSize,
-          queryBuilder: pushQueryBuilder,
-        },
-        pull: {
-          batchSize,
-          queryBuilder: pullQueryBuilder,
-        },
-        live: true,
-        liveInterval: 1000 * 60 * 60,
-        deletedFlag: "deleted",
-      });
-      replicationStates.push(replicationState);
-      subscribe(replicationState, subQuery);
-    } else {
-      throw "error replication verify your name of collection";
-    }
-  });
+      },
+      connectionCallback: () => {
+        console.log("SubscriptionClient.connectionCallback:");
+      },
+    });
+    collectionsName.map(async (name) => {
+      const collection = getCollection(name);
+      const { subQuery, pullQueryBuilder, pushQueryBuilder } = setupQuery(name);
+
+      if (collection) {
+        const replicationState = await collection.syncGraphQL({
+          url: SYNCURL,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          push: {
+            batchSize,
+            queryBuilder: pushQueryBuilder,
+          },
+          pull: {
+            batchSize,
+            queryBuilder: pullQueryBuilder,
+          },
+          live: true,
+          liveInterval: 1000 * 60 * 60,
+          deletedFlag: "deleted",
+        });
+        replicationStates.push(replicationState);
+        subscribe(replicationState, subQuery);
+      } else {
+        throw "error replication verify your name of collection";
+      }
+    });
+  }
 };
 
 /**
