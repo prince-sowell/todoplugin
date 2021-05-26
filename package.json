@@ -1,6 +1,6 @@
 {
   "name": "@julienprince007/todoplugin",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "RxDB domain todo",
   "main": "src/index.js",
   "repository": {
