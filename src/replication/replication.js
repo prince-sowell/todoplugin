@@ -63,7 +63,7 @@ export const createDb = async (name, userToken) => {
       ignoreDuplicate: true,
     });
     console.log("DatabaseService: created database");
-    // ajout de collection et son nom
+    // Add name and create collection
     Object.entries(schema).map(async ([key, value]) => {
       const obj = {};
       obj[key] = {
